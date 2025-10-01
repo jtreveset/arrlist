@@ -1,4 +1,6 @@
+ABÉLARD
 Aephanemer
+Agalloch
 Alestorm
 Allen/Lande
 Amon Amarth
@@ -19,10 +21,12 @@ Countless Skies
 Dance with the dead
 Dark Moor
 Dark Oath
+Decadence
 Dethklok
 Dragonforce
 Dragonland
 Dream Evil
+Dystera
 Edguy
 El Reno Renardo
 Epica
@@ -35,9 +39,11 @@ Hammerfall
 Heathen Foray
 Helloween
 Hiraes
+Huntress
 In Flames
 Insomnium
 Iron Maiden
+Iron Savior
 Joe Satriani
 Kalmah
 Linkin Park
@@ -56,6 +62,7 @@ Powerwolf
 Queen
 Rammstein
 Rhapsody of Fire
+Rondò Veneziano
 Running Wild
 S3RL
 Sabaton
