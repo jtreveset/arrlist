@@ -30,16 +30,18 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Generate artists.json
+      - name: Generate JSONs
         run: |
           python --version
           mkdir -p public
-          if [ ! -f "artists.txt" ]; then
-            echo "Input file 'artists.txt' not found at repo root." >&2
-            exit 1
-          fi
-          python generate_artists_json.py artists.txt public/artists.json
-          test -s public/artists.json
+          python generate_artists_json.py artists-classic.txt public/artists-classic.json
+          python generate_artists_json.py artists-electronic.txt public/artists-electronic.json
+          python generate_artists_json.py artists-metal.txt public/artists-metal.json
+          python generate_artists_json.py artists-rock.txt public/artists-rock.json
+          test -s public/artists-classic.json
+          test -s public/artists-electronic.json
+          test -s public/artists-metal.json
+          test -s public/artists-rock.json
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
