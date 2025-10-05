@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Traverse directories and re-encode FLAC files to 320kbps MP3."""
+"""Traverse directories and re-encode lossless audio files to 320kbps MP3."""
 from __future__ import annotations
 
 import argparse
@@ -10,12 +10,12 @@ from pathlib import Path
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Re-encode FLAC files within a directory tree to 320kbps MP3 files.",
+        description="Re-encode FLAC or lossless M4A files within a directory tree to 320kbps MP3 files.",
     )
     parser.add_argument(
         "root",
         type=Path,
-        help="Root directory to scan for FLAC files",
+        help="Root directory to scan for lossless audio files",
     )
     parser.add_argument(
         "--dry-run",
@@ -25,24 +25,27 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--remove-original",
         action="store_true",
-        help="Remove each original FLAC file after a successful conversion.",
+        help="Remove each original lossless file after a successful conversion.",
     )
     return parser.parse_args()
 
 
-def iter_flac_files(root: Path):
+SUPPORTED_EXTENSIONS = {".flac", ".m4a"}
+
+
+def iter_lossless_files(root: Path):
     for path in root.rglob("*"):
-        if path.is_file() and path.suffix.lower() == ".flac":
+        if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS:
             yield path
 
 
-def convert_flac(flac_path: Path, dry_run: bool = False) -> bool:
-    mp3_path = flac_path.with_suffix(".mp3")
+def convert_source(source_path: Path, dry_run: bool = False) -> bool:
+    mp3_path = source_path.with_suffix(".mp3")
     cmd = [
         "ffmpeg",
         "-y",
         "-i",
-        str(flac_path),
+        str(source_path),
         "-vn",
         "-codec:a",
         "libmp3lame",
@@ -51,34 +54,34 @@ def convert_flac(flac_path: Path, dry_run: bool = False) -> bool:
         str(mp3_path),
     ]
     if dry_run:
-        print(f"[dry-run] Would encode '{flac_path}' -> '{mp3_path}'")
+        print(f"[dry-run] Would encode '{source_path}' -> '{mp3_path}'")
         return True
 
-    print(f"Encoding '{flac_path}' -> '{mp3_path}'")
+    print(f"Encoding '{source_path}' -> '{mp3_path}'")
     try:
         result = subprocess.run(cmd, check=True)
     except FileNotFoundError:
         print("Error: ffmpeg not found. Ensure ffmpeg is installed and on PATH.", file=sys.stderr)
         return False
     except subprocess.CalledProcessError as exc:
-        print(f"ffmpeg failed for '{flac_path}' with exit code {exc.returncode}.", file=sys.stderr)
+        print(f"ffmpeg failed for '{source_path}' with exit code {exc.returncode}.", file=sys.stderr)
         return False
 
     return result.returncode == 0
 
 
-def remove_original(flac_path: Path, dry_run: bool = False) -> bool:
+def remove_original(source_path: Path, dry_run: bool = False) -> bool:
     if dry_run:
-        print(f"[dry-run] Would remove '{flac_path}'")
+        print(f"[dry-run] Would remove '{source_path}'")
         return True
 
     try:
-        flac_path.unlink()
+        source_path.unlink()
     except OSError as exc:
-        print(f"Failed to remove '{flac_path}': {exc}", file=sys.stderr)
+        print(f"Failed to remove '{source_path}': {exc}", file=sys.stderr)
         return False
 
-    print(f"Removed '{flac_path}'")
+    print(f"Removed '{source_path}'")
     return True
 
 
@@ -94,19 +97,22 @@ def main() -> None:
         print(f"Error: '{root}' is not a directory.", file=sys.stderr)
         sys.exit(1)
 
-    flac_files = list(iter_flac_files(root))
-    if not flac_files:
-        print("No FLAC files found; nothing to do.")
+    source_files = list(iter_lossless_files(root))
+    if not source_files:
+        print("No FLAC or lossless M4A files found; nothing to do.")
         return
 
     failed = 0
-    for flac_file in flac_files:
-        if not convert_flac(flac_file, dry_run=args.dry_run):
+    total = len(source_files)
+    for index, source_file in enumerate(source_files, start=1):
+        converted_ok = convert_source(source_file, dry_run=args.dry_run)
+        if not converted_ok:
             failed += 1
-            continue
+        elif args.remove_original and not remove_original(source_file, dry_run=args.dry_run):
+            failed += 1
 
-        if args.remove_original and not remove_original(flac_file, dry_run=args.dry_run):
-            failed += 1
+        percent_complete = (index / total) * 100
+        print(f"{index}/{total} files processed ({percent_complete:.1f}%)")
 
     if failed:
         print(f"Completed with {failed} failure(s).", file=sys.stderr)
