@@ -10,7 +10,7 @@ from pathlib import Path
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Re-encode FLAC or lossless M4A files within a directory tree to 320kbps MP3 files.",
+        description="Re-encode FLAC, WAV, or lossless M4A files within a directory tree to 320kbps MP3 files.",
     )
     parser.add_argument(
         "root",
@@ -30,7 +30,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-SUPPORTED_EXTENSIONS = {".flac", ".m4a"}
+SUPPORTED_EXTENSIONS = {".flac", ".m4a", ".wav"}
 
 
 def iter_lossless_files(root: Path):
@@ -99,7 +99,7 @@ def main() -> None:
 
     source_files = list(iter_lossless_files(root))
     if not source_files:
-        print("No FLAC or lossless M4A files found; nothing to do.")
+        print("No FLAC, WAV, or lossless M4A files found; nothing to do.")
         return
 
     failed = 0
