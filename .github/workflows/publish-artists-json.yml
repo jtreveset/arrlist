@@ -38,10 +38,12 @@ jobs:
           python generate_artists_json.py artists-electronic.txt public/artists-electronic.json
           python generate_artists_json.py artists-metal.txt public/artists-metal.json
           python generate_artists_json.py artists-rock.txt public/artists-rock.json
+          python generate_artists_json.py artists-ost.txt public/artists-ost.json
           test -s public/artists-classic.json
           test -s public/artists-electronic.json
           test -s public/artists-metal.json
           test -s public/artists-rock.json
+          test -s public/artists-ost.json
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
