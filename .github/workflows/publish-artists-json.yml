@@ -39,7 +39,7 @@ jobs:
           python generate_artists_json.py artists-metal.txt public/artists-metal.json
           python generate_artists_json.py artists-rock.txt public/artists-rock.json
           python generate_artists_json.py artists-ost.txt public/artists-ost.json
-          python generate_artists_json.py artists-indie.txt public/artists-indie.txt
+          python generate_artists_json.py artists-indie.txt public/artists-indie.json
           test -s public/artists-classic.json
           test -s public/artists-electronic.json
           test -s public/artists-metal.json
